@@ -28,18 +28,3 @@ This iteration of the engine resolved several critical race conditions:
 2.  **Goroutine Leaks:** Implemented strict 5-second `ACKTimeout` timeouts using `select` blocks in the network router to prevent stalled disk workers from permanently locking network threads[cite: 6].
 3.  **Compaction Lock Contention:** Separated background compaction into phases. Read locks are acquired only to map active offsets, completely decoupling the slow temp-file I/O from the mutexes blocking network reads[cite: 6].
 
-## Limitations & Known Constraints
-
-As an educational prototype, this engine has deliberate constraints:
-*   **Memory-Bound Compaction:** The 60-second background compaction (`OpCompact`) currently loads all live WAL entries into a `[]WALEntry` slice in memory before flushing to the temporary file[cite: 6]. The maximum dataset size is strictly bounded by available host RAM.
-*   **Index Constraints:** The entire key-to-offset index must fit in memory[cite: 5, 6].
-
-## Running the Project
-
-```bash
-# Build the engine
-go build -o wal-engine .
-
-# Run the server (Listens on TCP :8080)
-./wal-engine
-```
